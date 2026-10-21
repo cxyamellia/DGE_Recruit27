@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(task2_color)
+find_package(OpenCV REQUIRED)
+add_executable(task2_correct example.cpp)
+target_link_libraries(task2_correct ${OpenCV_LIBS})
