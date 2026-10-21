@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(task1_io)
+find_package(OpenCV REQUIRED)
+add_executable(task1_cam example.cpp)
+target_link_libraries(task1_cam ${OpenCV_LIBS})
