@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(task3_armor)
+find_package(OpenCV REQUIRED)
+add_executable(task3_detect example.cpp)
+target_link_libraries(task3_detect ${OpenCV_LIBS})
