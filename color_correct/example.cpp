@@ -1,87 +1,63 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 
-class myColorCorrect
-{
+class GrayWorldCorrect {
 public:
-    myColorCorrect() = default;
-    ~myColorCorrect() = default;
-    void correct(const cv::Mat &src, cv::Mat &dst);
-
-private:
-    cv::Scalar mean_bgr_;
+    GrayWorldCorrect() = default;
+    ~GrayWorldCorrect() = default;
+    void correct(const cv::Mat& src, cv::Mat& dst);
 };
 
-void myColorCorrect::correct(const cv::Mat &src, cv::Mat &dst)
+void GrayWorldCorrect::correct(const cv::Mat& src, cv::Mat& dst)
 {
-    if(src.empty())
-    {
-        std::cerr << "输入图像为空！" << std::endl;
-        return;
-    }
-    cv::Mat img;
-    src.copyTo(img);
+    if (src.empty()) return;
     std::vector<cv::Mat> channels;
-    cv::split(img, channels);
-    cv::Mat &b = channels[0];
-    cv::Mat &g = channels[1];
-    cv::Mat &r = channels[2];
+    cv::split(src, channels);
 
-    cv::Scalar mean_b = cv::mean(b);
-    cv::Scalar mean_g = cv::mean(g);
-    cv::Scalar mean_r = cv::mean(r);
+    double sumB = cv::sum(channels[0])[0];
+    double sumG = cv::sum(channels[1])[0];
+    double sumR = cv::sum(channels[2])[0];
 
-    double mb = mean_b[0];
-    double mg = mean_g[0];
-    double mr = mean_r[0];
+    int pixel_cnt = src.rows * src.cols;
+    double meanB = sumB / pixel_cnt;
+    double meanG = sumG / pixel_cnt;
+    double meanR = sumR / pixel_cnt;
 
-    double gray_avg = (mb + mg + mr) / 3.0;
+    double gray_mean = (meanB + meanG + meanR) / 3.0;
 
-    double kb = gray_avg / mb;
-    double kg = gray_avg / mg;
-    double kr = gray_avg / mr;
+    // 增益系数
+    double kb = gray_mean / meanB;
+    double kg = gray_mean / meanG;
+    double kr = gray_mean / meanR;
 
-    b = b * kb;
-    g = g * kg;
-    r = r * kr;
+    channels[0] = channels[0] * kb;
+    channels[1] = channels[1] * kg;
+    channels[2] = channels[2] * kr;
 
     cv::merge(channels, dst);
+    dst.convertTo(dst, CV_8UC3);
 }
-
 
 int main()
 {
-    myColorCorrect corrector;
-
-    cv::Mat src = cv::imread("test.jpg");
-    if(src.empty())
+    cv::VideoCapture cap(0);
+    if (!cap.isOpened())
     {
-        std::cout << "读取图片失败，切换为摄像头模式" << std::endl;
-        cv::VideoCapture cap(0);
-        if(!cap.isOpened())
-        {
-            std::cerr << "摄像头打开失败\n";
-            return -1;
-        }
-        cv::Mat frame, result;
-        while(cap.read(frame))
-        {
-            corrector.correct(frame, result);
-            cv::imshow("原始画面", frame);
-            cv::imshow("灰度世界校正后", result);
-            if(cv::waitKey(1) == 27) break;
-        }
-        cap.release();
+        std::cerr << "【任务2】摄像头打开失败！\n";
+        return -1;
     }
-    else
-    {
-        cv::Mat dst;
-        corrector.correct(src, dst);
-        cv::imshow("原图", src);
-        cv::imshow("色彩校正结果", dst);
-        cv::waitKey(0);
-    }
+    GrayWorldCorrect corrector;
+    cv::Mat frame, out;
 
+    while (cap.read(frame))
+    {
+        corrector.correct(frame, out);
+        cv::imshow("Task2 Original", frame);
+        cv::imshow("Task2 GrayWorld Corrected", out);
+        int key = cv::waitKey(1);
+        if (key == 27) break;
+    }
+    cap.release();
     cv::destroyAllWindows();
     return 0;
 }
