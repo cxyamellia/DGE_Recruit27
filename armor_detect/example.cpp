@@ -94,11 +94,13 @@ void myArmorDetect::detect(const cv::Mat &src, cv::Mat &draw_out)
             if(dist <20 || dist>300) continue;
 
             std::vector<cv::Point2f> pts;
-            cv::Point2f pts_buf[4];
-lights[i].points(pts_buf);
-for (int p = 0; p < 4; p++) {
-    pts.push_back(pts_buf[p]);
-}
+            cv::Point2f buf[4];
+            lights[i].points(buf);
+            pts.push_back(buf[0]);
+            pts.push_back(buf[1]);
+            lights[j].points(buf);
+            pts.push_back(buf[2]);
+            pts.push_back(buf[3]);
 
             std::vector<cv::Point> draw_pts;
             for(auto &pt:pts) draw_pts.emplace_back((cv::Point)pt);
