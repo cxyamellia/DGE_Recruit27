@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.16)
+project(yolo_detect)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
+add_executable(yolo_detect example.cpp myYoloDetect.cpp)
+target_link_libraries(yolo_detect ${OpenCV_LIBS})
